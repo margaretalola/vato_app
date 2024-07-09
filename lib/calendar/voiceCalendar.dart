@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import 'calendarRepository.dart';
@@ -14,11 +14,10 @@ class VoiceAssistant extends StatefulWidget {
 }
 
 class _VoiceAssistantState extends State<VoiceAssistant> {
-  final SpeechToText _speechToText = SpeechToText();
+  late stt.SpeechToText _speechToText;
   bool _isListening = false;
   String _recognizedText = '';
   bool _hasPermission = false;
-  bool _isProcessing = false;
   String _subject = '';
   String _date = '';
   String _time = '';
@@ -26,6 +25,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
   @override
   void initState() {
     super.initState();
+    _speechToText = stt.SpeechToText();
     _requestPermission();
   }
 
@@ -66,10 +66,22 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
     if (!_isListening) {
       setState(() {
         _isListening = true;
-        _isProcessing = true;
+        _recognizedText = '';
       });
 
-      bool available = await _speechToText.initialize(debugLogging: true);
+      bool available = await _speechToText.initialize(onStatus: (status) {
+        if (status == 'notListening') {
+          setState(() {
+            _isListening = false;
+          });
+        }
+      }, onError: (error) {
+        setState(() {
+          _isListening = false;
+        });
+        print('Error: $error');
+      });
+
       if (available) {
         _speechToText.listen(onResult: (val) {
           setState(() {
@@ -77,13 +89,11 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
             if (val.hasConfidenceRating && val.confidence > 0) {
               _parseRecognizedText(_recognizedText);
             }
-            _isProcessing = false;
           });
         });
       } else {
         setState(() {
           _isListening = false;
-          _isProcessing = false;
         });
       }
     } else {
@@ -127,25 +137,33 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
       print('No date found');
     }
 
-    // Extract the time
     final RegExp timeRegex = RegExp(r'at\s+(\d{1,2}(:\d{2})?\s*(AM|PM)?)');
     final RegExpMatch? timeMatch = timeRegex.firstMatch(recognizedText);
     if (timeMatch != null) {
       final String spokenTime = timeMatch.group(1)?.trim() ?? '';
       try {
-        DateTime parsedTime;
+        DateFormat inputFormat;
         if (spokenTime.contains('AM') || spokenTime.contains('PM')) {
-          parsedTime = DateFormat('h:mm a').parse(spokenTime);
+          inputFormat = DateFormat('h:mm a');
         } else {
-          parsedTime = DateFormat('H:mm').parse(spokenTime);
+          inputFormat = DateFormat('H:mm');
         }
-        _time = DateFormat('HH:mm').format(parsedTime);
+        final DateTime parsedTime = inputFormat.parse(spokenTime);
+        _time = DateFormat('HH:mm').format(parsedTime); // Format for saving
         print('Extracted time: $_time');
       } catch (e) {
         print('Error parsing time: $e');
+        setState(() {
+          _recognizedText = 'Error parsing time. Please try again.';
+        });
+        return;
       }
     } else {
       print('No time found');
+      setState(() {
+        _recognizedText = 'No time found. Please specify the time.';
+      });
+      return;
     }
 
     if (_subject.isNotEmpty && _date.isNotEmpty && _time.isNotEmpty) {
@@ -163,25 +181,22 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
         final DateTime appointmentDate = DateTime.parse(_date);
         print('Parsed appointment date: $appointmentDate');
 
-        final DateTime appointmentTime;
-
-        if (_time.isNotEmpty) {
-          appointmentTime = DateTime.parse('1970-01-01 ${_time}'); // Parse time with a dummy date
-          print('Parsed appointment time: $appointmentTime');
-        } else {
-          throw FormatException('Time string is empty');
-        }
-
-        // Combine date and time into a single DateTime object
-        final DateTime finalAppointmentDate = DateTime(
+        // Parse the time correctly
+        final DateFormat timeFormat = DateFormat('HH:mm');
+        final DateTime appointmentTime = DateTime(
           appointmentDate.year,
           appointmentDate.month,
           appointmentDate.day,
-          appointmentTime.hour,
-          appointmentTime.minute,
+          timeFormat.parse(_time).hour,
+          timeFormat.parse(_time).minute,
         );
+        print('Parsed appointment time: $appointmentTime');
+
+        // Combine date and time into a single DateTime object
+        final DateTime finalAppointmentDate = appointmentTime;
         print('Combined date and time: $finalAppointmentDate');
 
+        // Format the combined date and time consistently
         final String formattedDate = DateFormat('yyyy-MM-dd').format(finalAppointmentDate);
         final String formattedStartTime = DateFormat('HH:mm').format(finalAppointmentDate);
 
@@ -190,12 +205,13 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
           subject: _subject,
           date: formattedDate,
           start_time: formattedStartTime,
-          end_time: '', // Set end time to an empty string
+          end_time: formattedStartTime, // Set end_time to the same as start_time
           recurrence: '',
           category: 'Personal',
           isCompleted: false,
         );
 
+        print('Appointment before saving: $appointment');
         widget.appointmentRepository.addAppointment(appointment);
         setState(() {
           _recognizedText = 'Appointment saved!';
@@ -205,7 +221,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
         setState(() {
           _recognizedText = 'Error saving appointment. Please check the details.';
         });
-        print('Error: $e');
+        print('Error adding appointment: $e');
       }
     } else {
       setState(() {
@@ -227,14 +243,14 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
           ),
           SizedBox(height: 20),
           Icon(
-            _isListening? Icons.mic : Icons.mic_none,
+            _isListening ? Icons.mic : Icons.mic_none,
             size: 40,
-            color: _isListening? Colors.blue : Colors.black,
+            color: _isListening ? Colors.blue : Colors.black,
           ),
           SizedBox(height: 10),
           ElevatedButton(
             onPressed: _startListening,
-            child: _isListening? Text('Stop Speaking') : Text('Start Speaking'),
+            child: _isListening ? Text('Stop Speaking') : Text('Start Speaking'),
           ),
           SizedBox(width: 16),
           ElevatedButton(
