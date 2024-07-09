@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vato App</string>
+<!--    <string name="default_web_client_id_v2">20637779864-4o4v12bekeunf9r4pto15qaplrmk6m66.apps.googleusercontent.com</string>-->
+    <string name="default_web_client_id">20637779864-4o4v12bekeunf9r4pto15qaplrmk6m66.apps.googleusercontent.com</string>
+</resources>
