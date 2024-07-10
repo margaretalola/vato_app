@@ -8,16 +8,7 @@ import '../calendar/calendar.dart';
 import 'package:provider/provider.dart';
 import 'appState.dart';
 
-// class ButtonNavigationBarCustom extends StatefulWidget {
-//   const ButtonNavigationBarCustom({Key? key}) : super(key: key);
-//
-//   @override
-//   State<ButtonNavigationBarCustom> createState() => _ButtonNavigationBarCustomState();
-// }
-
 class ButtonNavigationBarCustom extends StatelessWidget {
-  int selectedIndex = 1; // Set the initial selected index to 1 (homepage)
-
   TaskRepository taskRepository = TaskRepository();
   AppointmentRepository appointmentRepository = AppointmentRepository();
 
@@ -25,12 +16,12 @@ class ButtonNavigationBarCustom extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
-        return _navBar(appState, context); // Pass appState here
+        return _navBar(appState, context);
       },
     );
   }
 
-  Widget _navBar(AppState appState, BuildContext context) { // appState is now a parameter
+  Widget _navBar(AppState appState, BuildContext context) {
     return Container(
       height: 65,
       margin: const EdgeInsets.only(
@@ -51,21 +42,50 @@ class ButtonNavigationBarCustom extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem(Icons.track_changes, 0, appState, context),
-          _buildNavItem(Icons.home_filled, 1,appState, context),
+          _buildHomeNavItem(Icons.home_filled, 1, appState, context),
           _buildNavItem(Icons.calendar_month, 2, appState, context),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, int index, AppState appState,BuildContext context) {
+  Widget _buildHomeNavItem(IconData icon, int index, AppState appState, BuildContext context) {
     bool isSelected = appState.selectedIndex == index;
     return GestureDetector(
       onTap: () {
         appState.setSelectedIndex(index);
+        appState.resetSelection();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => Homepage()),
+              (route) => false,
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: index == 1 ? Colors.blue : Colors.white,
+          shape: BoxShape.circle,
+          border: index == 1 ? Border.all(color: Colors.blue, width: 1) : null,
+        ),
+        child: Icon(
+          icon,
+          color: index == 1 ? Colors.white : Colors.grey,
+        ),
+      ),
+    );
+  }
 
+  Widget _buildNavItem(IconData icon, int index, AppState appState, BuildContext context) {
+    bool isSelected = appState.selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        appState.setSelectedIndex(index);
+        appState.resetSelection();
         if (index == 1) {
-          Navigator.of(true as BuildContext).popUntil((route) => route.isFirst);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => Homepage()),
+                (route) => false,
+          );
         } else {
           Widget selectedPage;
           switch (index) {
@@ -87,15 +107,13 @@ class ButtonNavigationBarCustom extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isSelected? Colors.blue : Colors.white,
+          color: isSelected ? Colors.blue : Colors.white,
           shape: BoxShape.circle,
-          border: isSelected
-              ? Border.all(color: Colors.blue, width: 1)
-              : null,
+          border: isSelected ? Border.all(color: Colors.blue, width: 1) : null,
         ),
         child: Icon(
           icon,
-          color: isSelected? Colors.white : Colors.grey,
+          color: isSelected ? Colors.white : Colors.grey,
         ),
       ),
     );
