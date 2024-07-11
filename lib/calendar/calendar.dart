@@ -25,6 +25,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
   final TextEditingController start_timeController = TextEditingController();
   final TextEditingController end_timeController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   late String _selectedRecurrence = 'None';
   late String _selectedCategory = 'Personal';
   late StreamSubscription<List<AppointmentCalendar>> _appointmentSubscription;
@@ -94,6 +95,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
 
   Future<void> _showEditAppointmentDialog(AppointmentCalendar appointment) async {
     subjectController.text = appointment.subject;
+    descriptionController.text = appointment.description;
     start_timeController.text = appointment.start_time;
     end_timeController.text = appointment.end_time;
     dateController.text = appointment.date;
@@ -112,6 +114,11 @@ class _CalendarCustomState extends State<CalendarCustom> {
                   TextField(
                     controller: subjectController,
                     decoration: InputDecoration(labelText: 'Subject'),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(labelText: 'Description'),
                   ),
                   SizedBox(height: 10),
                   TextField(
@@ -181,6 +188,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
                 final updatedAppointment = AppointmentCalendar(
                   id: appointment.id,
                   subject: subjectController.text,
+                  description: descriptionController.text,
                   start_time: start_timeController.text,
                   end_time: end_timeController.text,
                   date: dateController.text,
@@ -201,6 +209,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
 
   Future<void> _showAddAppointmentDialog() async {
     subjectController.clear();
+    descriptionController.clear();
     start_timeController.clear();
     end_timeController.clear();
     dateController.clear();
@@ -219,6 +228,11 @@ class _CalendarCustomState extends State<CalendarCustom> {
                   TextField(
                     controller: subjectController,
                     decoration: InputDecoration(labelText: 'Subject'),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(labelText: 'Description'),
                   ),
                   SizedBox(height: 10),
                   TextField(
@@ -289,6 +303,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
                 final newAppointment = AppointmentCalendar(
                   id: '',
                   subject: subjectController.text,
+                  description: descriptionController.text,
                   start_time: start_timeController.text,
                   end_time: end_timeController.text,
                   date: dateController.text,
@@ -356,6 +371,9 @@ class _CalendarCustomState extends State<CalendarCustom> {
         monthViewSettings: MonthViewSettings(
           showAgenda: true,
         ),
+        scheduleViewSettings: ScheduleViewSettings(
+          appointmentItemHeight: 50,
+        ),
         showNavigationArrow: true,
         onTap: _handleTap,
         appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details) {
@@ -418,7 +436,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
                         ),
                         TextSpan(
-                          text: '\nCategory: ${appointmentCalendar.category}',
+                          text: '\n${appointmentCalendar.category} | ${appointmentCalendar.start_time} - ${appointmentCalendar.end_time}',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 11,
@@ -476,11 +494,11 @@ class DataSource extends CalendarDataSource {
     appointments = source
         .map(
           (appointment) => Appointment(
-        id: appointment.id,
-        startTime: appointment.dateTime,
-        endTime: appointment.dateTime.add(Duration(minutes: 30)),
-        subject: appointment.subject,
-        color: getCategoryColor(appointment.category),
+              id: appointment.id,
+              startTime: appointment.dateTime,
+              endTime: appointment.dateTime.add(Duration(minutes: 30)),
+              subject: appointment.subject,
+              color: getCategoryColor(appointment.category),
       ),
     )
         .toList();

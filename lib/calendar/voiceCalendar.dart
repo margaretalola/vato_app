@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'calendarRepository.dart';
 
 class VoiceAssistant extends StatefulWidget {
@@ -19,6 +20,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
   String _recognizedText = '';
   bool _hasPermission = false;
   String _subject = '';
+  String _description = '';
   String _date = '';
   String _time = '';
 
@@ -167,11 +169,54 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
     }
 
     if (_subject.isNotEmpty && _date.isNotEmpty && _time.isNotEmpty) {
-      _saveAppointment();
+      _saveAppointmentToRepository();
     }
   }
 
+  void _saveAppointmentToRepository() async {
+    try {
+      _saveAppointment();
+      _showSuccessDialog('Task added successfully');
+    } catch (e) {
+      print('Error: $e');
+      _showErrorDialog('Error adding task: $e');
+    }
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Success'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _saveAppointment() {
+    print('Saving tasks...');
     print('Subject: $_subject');
     print('Date: $_date');
     print('Time: $_time');
@@ -203,10 +248,11 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
         final AppointmentCalendar appointment = AppointmentCalendar(
           id: '',
           subject: _subject,
+          description: _description,
           date: formattedDate,
           start_time: formattedStartTime,
           end_time: formattedStartTime, // Set end_time to the same as start_time
-          recurrence: '',
+          recurrence: 'None',
           category: 'Personal',
           isCompleted: false,
         );
@@ -254,9 +300,11 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
           ),
           SizedBox(width: 16),
           ElevatedButton(
-            onPressed: _saveAppointment,
-            child: Text('Save'),
-          ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Close'),
+          )
         ],
       ),
     );

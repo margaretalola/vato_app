@@ -1,1 +1,0 @@
-enum RecurrenceRule { daily, weekly, monthly, none }

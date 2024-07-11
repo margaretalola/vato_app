@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AppointmentCalendar {
   final String id;
   final String subject;
+  final String description;
   final String date;
   final String start_time;
   final String end_time;
@@ -19,6 +20,7 @@ class AppointmentCalendar {
   AppointmentCalendar({
     required this.id,
     required this.subject,
+    required this.description,
     required this.date,
     required this.start_time,
     required this.end_time,
@@ -43,6 +45,7 @@ class AppointmentCalendar {
     return AppointmentCalendar(
       id: '',
       subject: '',
+      description: '',
       start_time: '',
       end_time: '',
       date: '',
@@ -63,6 +66,7 @@ class AppointmentCalendar {
       return AppointmentCalendar(
         id: doc.id,
         subject: data['subject'],
+        description: data['description'],
         date: date,
         start_time: '00:00', // Default value
         end_time: '00:00', // Default value
@@ -78,6 +82,7 @@ class AppointmentCalendar {
       return AppointmentCalendar(
         id: doc.id,
         subject: data['subject'],
+        description: data['description'],
         date: date,
         start_time: startTime,
         end_time: endTime,
@@ -89,6 +94,7 @@ class AppointmentCalendar {
       return AppointmentCalendar(
         id: doc.id,
         subject: data['subject'],
+        description: data['description'],
         date: date,
         start_time: '00:00',
         end_time: '00:00',
@@ -104,6 +110,7 @@ class AppointmentCalendar {
 
     return {
       'subject': subject,
+      'description': description,
       'date': date,
       'start_time': start_time,
       'end_time': end_time,

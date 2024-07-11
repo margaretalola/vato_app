@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -143,17 +144,20 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
             _title = title;
             _date = formattedDate;
             _time = formattedTime;
-            _tasksToBeAdded.add(Task(
-              id: '',
-              title: _title,
-              description: '',
-              date: _date,
-              time: _time,
-              selectedRemind: 0,
-              selectedCategory: 'Other',
-              isDone: false,
-            ));
           });
+
+          // Save task to repository
+          _saveTaskToRepository(Task(
+            id: '',
+            title: _title,
+            description: '',
+            date: _date,
+            time: _time,
+            selectedRemind: 0,
+            selectedCategory: 'Other',
+            isDone: false,
+          ));
+
         } catch (e) {
           print('Error parsing date and time: $e');
         }
@@ -161,39 +165,50 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
     }
   }
 
-  void _saveTasks() async {
-    print('Saving tasks...');
-    print('Subject: $_title');
-    print('Date: $_date');
-    print('Time: $_time');
-
+  void _saveTaskToRepository(Task task) async {
     try {
-      if (_tasksToBeAdded.isNotEmpty) {
-        for (final task in _tasksToBeAdded) {
-          print('Saving task: ${task.title} on ${task.date} at ${task.time}');
-          await widget.taskRepository.addTask(task);
-        }
-        setState(() {
-          _recognizedText = '';
-          _tasksToBeAdded.clear();
-        });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Tasks saved successfully'),
-          duration: Duration(seconds: 2),
-        ));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('No tasks found'),
-          duration: Duration(seconds: 2),
-        ));
-      }
+      await widget.taskRepository.addTask(task);
+      setState(() {
+        _tasksToBeAdded.add(task);
+        _recognizedText = 'Task saved!';
+      });
+      _showSuccessDialog('Task added successfully');
     } catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error saving tasks: $e'),
-        duration: Duration(seconds: 2),
-      ));
+      _showErrorDialog('Error adding task: $e');
     }
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Success'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -210,7 +225,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
           SizedBox(height: 20),
           Icon(
             _isListening ? Icons.mic : Icons.mic_none,
-            size: 40,
+            size: 50,
             color: _isListening ? Colors.blue : Colors.black,
           ),
           SizedBox(height: 10),
@@ -218,32 +233,13 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
             onPressed: _startListening,
             child: _isListening ? Text('Stop Speaking') : Text('Start Speaking'),
           ),
-          SizedBox(width: 16),
+          SizedBox(height: 10),
           ElevatedButton(
-            onPressed: _saveTasks,
-            child: Text('Save'),
-          ),
-          if (_tasksToBeAdded.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                itemCount: _tasksToBeAdded.length,
-                itemBuilder: (context, index) {
-                  final task = _tasksToBeAdded[index];
-                  return ListTile(
-                    title: Text(task.title),
-                    subtitle: Text('${task.date} at ${task.time}'),
-                    trailing: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _tasksToBeAdded.removeAt(index);
-                        });
-                      },
-                      icon: Icon(Icons.delete),
-                    ),
-                  );
-                },
-              ),
-            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Close'),
+          )
         ],
       ),
     );

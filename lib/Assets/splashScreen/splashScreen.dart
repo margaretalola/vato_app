@@ -1,6 +1,7 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vato_app/homepage/Homepage.dart';
 import 'package:vato_app/registerPage/signIn.dart';
 
@@ -13,7 +14,7 @@ class _SplashScreenState extends State<Splashscreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
+    _checkIfUserHasLogin();
   }
 
   @override
@@ -50,10 +51,24 @@ class _SplashScreenState extends State<Splashscreen> {
     );
   }
 
+  void _checkIfUserHasLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasLogin = prefs.getBool('hasLogin');
+
+    if (hasLogin != null && hasLogin){
+      _navigateToNextScreen();
+    } else {
+      await Future.delayed(const Duration(seconds: 4));
+      _navigateToNextScreen();
+    }
+  }
+
   void _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 4));
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setBool('hasLogin', true);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Homepage()),

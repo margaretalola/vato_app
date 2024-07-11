@@ -25,7 +25,7 @@ class _MyDayState extends State<MyDay> {
   List<Task> _tasks = [];
   final List<int> _remindList = [0, 5, 10, 15];
   final List<String> _categoryList = ['Personal', 'Meetings', 'Business', 'Shopping', 'Other'];
-  final List<String> _sortingCategory = ['Complete', 'Incomplete', 'Today', 'Tomorrow', '7 Days'];
+  final List<String> _sortingCategory = ['Complete', 'Incomplete', 'Today', 'Tomorrow'];
   late Stream<List<Task>> _taskStream;
 
   @override
@@ -205,15 +205,6 @@ class _MyDayState extends State<MyDay> {
           final task2IsTomorrow = task2Date.year == tomorrow.year && task2Date.month == tomorrow.month && task2Date.day == tomorrow.day;
           return task1IsTomorrow ? -1 : (task2IsTomorrow ? 1 : 0);
         });
-      } else if (sortingCategory == '7 Days') {
-        final sevenDaysFromNow = DateTime.now().add(Duration(days: 7));
-        _tasks.sort((task1, task2) {
-          final task1Date = DateFormat('dd-MM-yyyy').parse(task1.date);
-          final task2Date = DateFormat('dd-MM-yyyy').parse(task2.date);
-          final task1IsInNext7Days = task1Date.isBefore(sevenDaysFromNow) && task1Date.isAfter(DateTime.now());
-          final task2IsInNext7Days = task2Date.isBefore(sevenDaysFromNow) && task2Date.isAfter(DateTime.now());
-          return task1IsInNext7Days ? -1 : (task2IsInNext7Days ? 1 : 0);
-        });
       } else {
         _tasks.sort((task1, task2) => task1.title.compareTo(task2.title));
       }
@@ -245,7 +236,24 @@ class _MyDayState extends State<MyDay> {
           PopupMenuButton<String>(
             icon: Icon(Icons.sort),
             onSelected: (String value) {
-              _sortTasks(value);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Sorting Tasks'),
+                    content: Text('You have selected to sort tasks by $value'),
+                    actions: [
+                      ElevatedButton(
+                        child: Text('OK'),
+                        onPressed: () {
+                          _sortTasks(value);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
             itemBuilder: (BuildContext context) {
               return _sortingCategory.map((String choice) {
@@ -255,7 +263,7 @@ class _MyDayState extends State<MyDay> {
                 );
               }).toList();
             },
-          ),
+          )
         ],
       ),
       body: _tasks.isEmpty
