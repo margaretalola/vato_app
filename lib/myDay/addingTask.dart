@@ -185,7 +185,6 @@ class _AddingTaskState extends State<AddingTask> {
             ),
           );
         },
-        // child: Text(widget.isEditMode ? 'Update' : 'Add'),
         label: Text(widget.isEditMode ? 'Update' : 'Save'),
         icon: Icon(Icons.save),
       ),

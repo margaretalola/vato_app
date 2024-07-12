@@ -1,11 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:provider/provider.dart';
-import 'package:vato_app/firebase_messaging.dart';
+import 'package:vato_app/Assets/notification_screen.dart';
+import 'package:vato_app/api/firebase_api.dart';
 import 'package:vato_app/registerPage/signUp.dart';
 import 'package:vato_app/registerPage/signIn.dart';
 import 'Assets/appState.dart';
@@ -14,13 +14,24 @@ import 'package:vato_app/Assets/splashScreen/splashScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final envFile = File(join(dirname(Platform.script.toFilePath()), '.env'));
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'default_channel_id', // id
+  'Default Channel', // name
+  description: 'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
 Future<void> main() async {
-  try{
+  try {
     WidgetsFlutterBinding.ensureInitialized();
     await dotenv.load(fileName: '.env', isOptional: false);
     final firebaseOptions = FirebaseOptions(
@@ -31,7 +42,13 @@ Future<void> main() async {
     );
     await Firebase.initializeApp(options: firebaseOptions);
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-    await FirebaseMessagingState().initNotification();
+
+    // Initialize notification channel for Android
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
+    await FirebaseApi().initNotifications();
     runApp(MyApp());
   } catch (e) {
     print('Error loading .env file: $e');
@@ -52,6 +69,7 @@ class MyApp extends StatelessWidget {
           '/home': (context) => Homepage(),
           '/signIn': (context) => SignInPage(),
           '/signUp': (context) => SignUpPage(),
+          '/notification-screen': (context) => NotificationScreen(),
         },
       ),
     );

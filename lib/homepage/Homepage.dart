@@ -190,7 +190,7 @@ class _homepage extends State<Homepage> {
     try {
       final tasksStream = _taskRepository.getTasks();
       tasksStream.listen((tasks) {
-        print('Tasks fetched: $tasks'); // Add this debug print
+        print('Tasks fetched: $tasks');
         final today = DateTime.now();
         final todaysTasks = tasks.where((task) {
           try {
@@ -199,17 +199,17 @@ class _homepage extends State<Homepage> {
                 taskDate.month == today.month &&
                 taskDate.day == today.day;
           } catch (e) {
-            print('Invalid date format for task: ${task.date}'); // Add this debug print
+            print('Invalid date format for task: ${task.date}');
             return false;
           }
         }).toList();
         setState(() {
           _tasks = todaysTasks;
-          print('Today\'s tasks: $_tasks'); // Add this debug print
+          print('Today\'s tasks: $_tasks');
         });
       });
     } catch (e) {
-      print('Error fetching tasks: $e'); // Add this debug print
+      print('Error fetching tasks: $e');
     }
   }
 

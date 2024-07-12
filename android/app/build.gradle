@@ -73,7 +73,6 @@ flutter {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-//    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation('com.google.android.gms:play-services-measurement-api:22.0.1') {
         exclude group: 'com.google.android.libraries.abuse.recaptcha'
     }

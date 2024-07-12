@@ -109,7 +109,6 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
   void _parseRecognizedText(String recognizedText) {
     print('Recognized text: $recognizedText');
 
-    // Extract the subject
     final RegExp subjectRegex = RegExp(r'^(.*?)\son\s');
     final RegExpMatch? subjectMatch = subjectRegex.firstMatch(recognizedText);
     if (subjectMatch != null) {
@@ -119,7 +118,6 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
       print('No subject found');
     }
 
-    // Extract the date
     final RegExp dateRegex = RegExp(r'(\d{1,2}(st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December))');
     final RegExpMatch? dateMatch = dateRegex.firstMatch(recognizedText);
     if (dateMatch != null) {
@@ -237,11 +235,9 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
         );
         print('Parsed appointment time: $appointmentTime');
 
-        // Combine date and time into a single DateTime object
         final DateTime finalAppointmentDate = appointmentTime;
         print('Combined date and time: $finalAppointmentDate');
 
-        // Format the combined date and time consistently
         final String formattedDate = DateFormat('yyyy-MM-dd').format(finalAppointmentDate);
         final String formattedStartTime = DateFormat('HH:mm').format(finalAppointmentDate);
 
@@ -251,7 +247,7 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
           description: _description,
           date: formattedDate,
           start_time: formattedStartTime,
-          end_time: formattedStartTime, // Set end_time to the same as start_time
+          end_time: formattedStartTime,
           recurrence: 'None',
           category: 'Personal',
           isCompleted: false,

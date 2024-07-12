@@ -135,7 +135,6 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
           String dateTimeString = '$day $monthNumber $currentYear $time';
           print('DateTime String: $dateTimeString');
 
-          // Ensure the format string matches the expected format of dateTimeString
           DateTime parsedDateTime = DateFormat('dd MM yyyy HH:mm').parse(dateTimeString);
           String formattedDate = DateFormat('dd-MM-yyyy').format(parsedDateTime);
           String formattedTime = DateFormat('HH:mm').format(parsedDateTime);
@@ -146,7 +145,6 @@ class _VoiceAssistantState extends State<VoiceAssistant> {
             _time = formattedTime;
           });
 
-          // Save task to repository
           _saveTaskToRepository(Task(
             id: '',
             title: _title,

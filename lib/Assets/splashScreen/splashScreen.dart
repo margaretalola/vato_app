@@ -44,6 +44,8 @@ class _SplashScreenState extends State<Splashscreen> {
                   ),
                 ),
               ],
+              totalRepeatCount: 1,
+              onFinished: () => _navigateToNextScreen(),
             ),
           ],
         ),
@@ -54,26 +56,29 @@ class _SplashScreenState extends State<Splashscreen> {
   void _checkIfUserHasLogin() async {
     final prefs = await SharedPreferences.getInstance();
     final hasLogin = prefs.getBool('hasLogin');
+    print('hasLogin: $hasLogin');
 
-    if (hasLogin != null && hasLogin){
-      _navigateToNextScreen();
-    } else {
-      await Future.delayed(const Duration(seconds: 4));
-      _navigateToNextScreen();
+    if (hasLogin == null || !hasLogin) {
+      return;
     }
+
+    _navigateToNextScreen();
   }
 
   void _navigateToNextScreen() async {
     User? user = FirebaseAuth.instance.currentUser;
+    print('currentUser: $user');
+
     if (user != null) {
       final prefs = await SharedPreferences.getInstance();
       prefs.setBool('hasLogin', true);
-
+      print('Navigating to Homepage');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Homepage()),
       );
     } else {
+      print('Navigating to SignInPage');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SignInPage()),
