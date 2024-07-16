@@ -8,13 +8,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class FirebaseApi {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
-  final _androidChannel = const AndroidNotificationDetails(
-    'high_importance_channel',
-    'High Importance Notifications',
-    channelDescription: 'This channel is used for important notifications',
-    importance: Importance.high,
-  );
-
   final _localNotifications = FlutterLocalNotificationsPlugin();
 
   void handleMessage(RemoteMessage? message) {
@@ -43,9 +36,10 @@ class FirebaseApi {
         notification.body,
         NotificationDetails(
           android: AndroidNotificationDetails(
-            _androidChannel.channelId,
-            _androidChannel.channelName,
-            channelDescription: _androidChannel.channelDescription,
+            'high_importance_channel',
+            'High Importance Notifications',
+            channelDescription: 'This channel is used for important notifications',
+            importance: Importance.high,
             icon: '@drawable/launcher_icon',
           ),
         ),
@@ -69,9 +63,15 @@ class FirebaseApi {
       },
     );
 
-    final platform = _localNotifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    await platform?.createNotificationChannel(_androidChannel as AndroidNotificationChannel);
+    final androidPlatform = _localNotifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (androidPlatform != null) {
+      await androidPlatform.createNotificationChannel(const AndroidNotificationChannel(
+        'high_importance_channel',
+        'High Importance Notifications',
+        description: 'This channel is used for important notifications',
+        importance: Importance.high,
+      ));
+    }
   }
 
   void handleForegroundMessage(RemoteMessage message) {
@@ -85,10 +85,10 @@ class FirebaseApi {
         notification.body,
         NotificationDetails(
           android: AndroidNotificationDetails(
-            channel.id,
-            channel.name,
-            channelDescription: channel.description,
-            icon: android.smallIcon,
+            'high_importance_channel',
+            'High Importance Notifications',
+            channelDescription: 'This channel is used for important notifications',
+            icon: '@drawable/launcher_icon',
           ),
         ),
       );
@@ -97,8 +97,8 @@ class FirebaseApi {
 
   Future<void> initNotifications() async {
     await _firebaseMessaging.requestPermission();
-    final FCMToken = await _firebaseMessaging.getToken();
-    print('Token: $FCMToken');
+    final fcmToken = await _firebaseMessaging.getToken();
+    print('Token: $fcmToken');
     await initPushNotifications();
     await initLocalNotifications();
   }

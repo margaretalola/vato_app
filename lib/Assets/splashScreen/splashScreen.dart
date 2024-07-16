@@ -25,6 +25,7 @@ class _SplashScreenState extends State<Splashscreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: 20),
+            SizedBox(height: 20),
             AnimatedTextKit(
               animatedTexts: [
                 TyperAnimatedText(
@@ -33,19 +34,24 @@ class _SplashScreenState extends State<Splashscreen> {
                     fontSize: 20,
                     color: Colors.blue,
                   ),
-                  speed: const Duration(milliseconds: 50),
+                  speed: const Duration(milliseconds: 70), // Adjust duration
                 ),
                 RotateAnimatedText(
                   'VaTo App',
                   textStyle: TextStyle(
                     fontSize: 20,
                     color: Colors.blue,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.bold,
                   ),
+                  duration: const Duration(milliseconds: 1000), // Adjust duration
                 ),
               ],
               totalRepeatCount: 1,
-              onFinished: () => _navigateToNextScreen(),
+              onFinished: () async {
+                print('Animation finished');
+                await Future.delayed(const Duration(seconds: 5)); // Add a longer delay
+                _navigateToNextScreen();
+              },
             ),
           ],
         ),
@@ -59,30 +65,24 @@ class _SplashScreenState extends State<Splashscreen> {
     print('hasLogin: $hasLogin');
 
     if (hasLogin == null || !hasLogin) {
-      return;
+      await Future.delayed(const Duration(seconds: 2000)); // Add a longer delay
+      _navigateToNextScreen();
+    } else {
+      _navigateToHomepage();
     }
-
-    _navigateToNextScreen();
   }
 
   void _navigateToNextScreen() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    print('currentUser: $user');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInPage()),
+    );
+  }
 
-    if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setBool('hasLogin', true);
-      print('Navigating to Homepage');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Homepage()),
-      );
-    } else {
-      print('Navigating to SignInPage');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SignInPage()),
-      );
-    }
+  void _navigateToHomepage() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => Homepage()),
+    );
   }
 }

@@ -1,8 +1,13 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Assets/buttonNavigationBar.dart';
 import '../calendar/calendarRepository.dart';
 import '../myDay/taskRepository.dart';
@@ -117,13 +122,7 @@ class _homepage extends State<Homepage> {
               size: 30,
               color: Colors.white,
             ),
-            onPressed: () async {
-              await firebaseAuth.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SignInPage()),
-              );
-            },
+            onPressed: () => _logoutUser(context),
           ),
         ],
       ),
@@ -140,6 +139,18 @@ class _homepage extends State<Homepage> {
         ),
       ),
       bottomNavigationBar: ButtonNavigationBarCustom(),
+    );
+  }
+
+  void _logoutUser(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await firebase_auth.FirebaseAuth.instance.signOut();
+    await prefs.remove('is_logged_in');
+    await prefs.remove('auth_token');
+    prefs.setBool('hasLogin', false);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => SignInPage()),
     );
   }
 

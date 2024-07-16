@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Replace these placeholders with actual values from your google-services.json -->
+    <string name="google_app_id">1:20637779864:android:05070af2b608b2e19ecded</string>
+    <string name="project_id">flutter-todo-app-68820</string>
+    <string name="api_key">AIzaSyDpC8GXdaaONuAxG7LCBYSnkL00T9Yr-nU</string>
+    <string name="firebase_database_url">https://flutter-todo-app-68820.firebaseio.com</string>
+    <string name="gcm_defaultSenderId">20637779864</string>
+    <string name="google_api_key">AIzaSyDpC8GXdaaONuAxG7LCBYSnkL00T9Yr-nU</string>
+<!--    <string name="google_crash_reporting_api_key">YOUR_CRASH_REPORTING_API_KEY</string>-->
+    <string name="google_storage_bucket">flutter-todo-app-68820.appspot.com</string>
+</resources>

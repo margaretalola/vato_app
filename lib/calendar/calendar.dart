@@ -362,7 +362,7 @@ class _CalendarCustomState extends State<CalendarCustom> {
         title: const Text('Calendar'),
       ),
       body: SfCalendar(
-        view: CalendarView.schedule,
+        view: CalendarView.month,
         allowedViews: [
           CalendarView.month,
           CalendarView.schedule,

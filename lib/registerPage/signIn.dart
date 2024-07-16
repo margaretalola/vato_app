@@ -152,6 +152,10 @@ class _SignInPageState extends State<SignInPage> {
           final token = await firebase_auth.FirebaseAuth.instance.currentUser!.getIdToken();
           await UserPreferences().setAuthToken(token!);
           await UserPreferences().setLoggedIn(true);
+
+          final prefs = await SharedPreferences.getInstance();
+          prefs.setBool('hasLogin', true);
+
           navigatorKey.currentState!.pushReplacement(
             MaterialPageRoute(builder: (context) => Homepage()),
           );
