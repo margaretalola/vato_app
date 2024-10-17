@@ -1,8 +1,8 @@
 {
   "project_info": {
-    "project_number": "20637779864",
-    "project_id": "flutter-todo-app-68820",
-    "storage_bucket": "flutter-todo-app-68820.appspot.com"
+    "project_number": "//number_project",
+    "project_id": "//ID_Project-Firebase",
+    "storage_bucket": "//storage_firebase"
   },
   "client": [
     {
@@ -20,7 +20,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDpC8GXdaaONuAxG7LCBYSnkL00T9Yr-nU"
+          "current_key": "//api key"
         }
       ],
       "services": {
